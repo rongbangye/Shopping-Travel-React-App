@@ -4,7 +4,7 @@ import Axios from 'axios';
 import Dropzone from 'react-dropzone';
 
 function FileUpload(props) {
-  const [Image, setImage] = useState([]);
+  const [Images, setImages] = useState([]);
 
   const onDrop = (files) => {
     let formData = new FormData();
@@ -16,8 +16,8 @@ function FileUpload(props) {
     Axios.post('/api/product/uploadImage', formData, config).then(
       (response) => {
         if (response.data.success) {
-          setImage([...Image, response.data.image]);
-          props.refreshFunction([...Image, response.data.image]);
+          setImages([...Images, response.data.image]);
+          props.refreshFunction([...Images, response.data.image]);
         } else {
           alert('Failed to save the Image in Server');
         }
@@ -27,8 +27,24 @@ function FileUpload(props) {
     // save the Image we chosse inside the Node Server
   };
 
+  const onDelete = (image) => {
+    const currentIndex = Images.indexOf(image);
+
+    let newImages = [...Images];
+    newImages.splice(currentIndex, 1);
+
+    setImages(newImages);
+    props.refreshFunction(newImages);
+  };
+
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        overflow: 'hidden',
+      }}
+    >
       <Dropzone onDrop={onDrop} multiple={false} maxSize={8000000}>
         {({ getRootProps, getInputProps }) => (
           <div
@@ -53,10 +69,23 @@ function FileUpload(props) {
           display: 'flex',
           width: '350px',
           height: '240px',
-          overflowX: 'scroll',
+          // overflowX: 'scroll',
+          overflow: 'auto',
         }}
       >
-        <div onClick></div>
+        {Images.map((image, index) => (
+          <div onClick={() => onDelete(image)}>
+            <img
+              style={{
+                minWidth: '300px',
+                width: '300px',
+                height: '240px',
+              }}
+              src={`http://localhost:5000/${image}`}
+              alt={`productImg-${index}`}
+            />
+          </div>
+        ))}
       </div>
     </div>
   );
